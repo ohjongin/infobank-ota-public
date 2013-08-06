@@ -1,0 +1,94 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description></description>
+  <keepDependencies>false</keepDependencies>
+  <properties/>
+  <scm class="hudson.scm.SubversionSCM" plugin="subversion@1.50">
+    <locations>
+      <hudson.scm.SubversionSCM_-ModuleLocation>
+        <remote>svn+ssh://0.0.0.0/home/mntalk/android/NGM/truck</remote>
+        <local>./NGM/truck/</local>
+        <depthOption>infinity</depthOption>
+        <ignoreExternalsOption>false</ignoreExternalsOption>
+      </hudson.scm.SubversionSCM_-ModuleLocation>
+    </locations>
+    <excludedRegions></excludedRegions>
+    <includedRegions></includedRegions>
+    <excludedUsers></excludedUsers>
+    <excludedRevprop></excludedRevprop>
+    <excludedCommitMessages></excludedCommitMessages>
+    <workspaceUpdater class="hudson.scm.subversion.CheckoutUpdater"/>
+    <ignoreDirPropChanges>false</ignoreDirPropChanges>
+    <filterChangelog>false</filterChangelog>
+  </scm>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers class="vector">
+    <hudson.triggers.SCMTrigger>
+      <spec>H 6 * * 1-5</spec>
+      <ignorePostCommitHooks>false</ignorePostCommitHooks>
+    </hudson.triggers.SCMTrigger>
+  </triggers>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+      <command>#make a local.properties file
+echo &quot;sdk.dir=/usr/lib/android-sdk-linux&quot; &gt; NGM/truck/MMSSend_Lib/local.properties
+echo &quot;sdk.dir=/usr/lib/android-sdk-linux&quot; &gt; NGM/truck/NGMAccountModule/local.properties
+echo &quot;sdk.dir=/usr/lib/android-sdk-linux&quot; &gt; NGM/truck/NGMNetworkModule/local.properties
+echo &quot;sdk.dir=/usr/lib/android-sdk-linux&quot; &gt; NGM/truck/NGMNotification/local.properties
+echo &quot;sdk.dir=/usr/lib/android-sdk-linux&quot; &gt; NGM/truck/NGMPushModule/local.properties
+echo &quot;sdk.dir=/usr/lib/android-sdk-linux&quot; &gt; NGM/truck/NGMReportModule/local.properties
+echo &quot;sdk.dir=/usr/lib/android-sdk-linux&quot; &gt; NGM/truck/NGMServiceModule/local.properties
+
+#make a ant.properties file
+echo &quot;
+sdk.dir=/usr/lib/android-sdk-linux/tools/ant
+key.store=/home/sms/project/android/NGM/truck/NGMNotification/mntalk.keystore
+key.alias=mntalk
+key.store.password=xxxxxxxx
+key.alias.password=xxxxxxxx
+&quot; &gt; NGM/truck/NGMNotification/ant.properties
+
+cd NGM/truck/NGMNotification
+rm -f ./proguard-project.txt
+cp ${WORKSPACE}/proguard-project.txt .
+
+export ANT_HOME=/usr/lib/android-sdk-linux/tools
+ant clean release</command>
+    </hudson.tasks.Shell>
+    <hudson.tasks.Shell>
+      <command>cp ${WORKSPACE}/NGM/truck/NGMNotification/bin/net.ib.notification-release.apk ${WORKSPACE}/G_MessageTong_auto-build_${BUILD_ID}.apk
+cp /var/lib/jenkins/jobs/MessageTong/builds/${BUILD_NUMBER}/changelog.xml ${WORKSPACE}/changelog.xml
+
+python ${WORKSPACE}/uploadToParse.py ${WORKSPACE}/G_MessageTong_auto-build_${BUILD_ID}.apk ${BUILD_NUMBER}
+
+rm -f ${WORKSPACE}/G_MessageTong_auto-build_${BUILD_ID}.apk</command>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers>
+    <hudson.tasks.ArtifactArchiver>
+      <artifacts>NGM/truck/NGMNotification/bin/net.ib.notification-release.apk</artifacts>
+      <latestOnly>false</latestOnly>
+      <allowEmptyArchive>false</allowEmptyArchive>
+    </hudson.tasks.ArtifactArchiver>
+    <hudson.tasks.Mailer plugin="mailer@1.5">
+      <recipients>android@yourcompany.email</recipients>
+      <dontNotifyEveryUnstableBuild>false</dontNotifyEveryUnstableBuild>
+      <sendToIndividuals>false</sendToIndividuals>
+    </hudson.tasks.Mailer>
+    <com.myyearbook.hudson.plugins.confluence.ConfluencePublisher plugin="confluence-publisher@1.8">
+      <siteName>siteName.atlassian.net</siteName>
+      <attachArchivedArtifacts>false</attachArchivedArtifacts>
+      <buildIfUnstable>false</buildIfUnstable>
+      <fileSet>changelog.xml</fileSet>
+      <spaceName>MsgTong</spaceName>
+      <pageName>Jenkins</pageName>
+      <editors/>
+    </com.myyearbook.hudson.plugins.confluence.ConfluencePublisher>
+  </publishers>
+  <buildWrappers/>
+</project>

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">m&amp;OTA</string>
+
+    <string name="activity_main_title">OTA</string>
+
+    <string name="action_refresh">Refresh</string>
+    <string name="action_settings">Settings</string>
+    <string name="action_delete_cache_file">캐시 파일 삭제</string>
+    <string name="action_self_update">셀프 업데이트</string>
+
+    <string name="action_install">설치...</string>
+    <string name="action_upload">등록...</string>
+
+    <string name="no_ext_storage">외장메모리가 없습니다.</string>
+    <string name="install_apk">%s 을(를) 설치합니다.</string>
+    <string name="upload_apk">%s 을(를) 업로드합니다.</string>
+    <string name="downloading">다운로드 중...</string>
+    <string name="uploading">업로드 중...</string>
+    <string name="download_canceled">다운로드 취소</string>
+    <string name="upload_canceled">업로드 취소</string>
+    <string name="ask_install">설치하시겠습니까?</string>
+    <string name="install_failed">파일(%s)이 없어 설치에 실패했습니다.</string>
+    <string name="install_selected">선택한 파일을 설치합니다.</string>
+    <string name="new_apk">%d 개의 새 파일이 있습니다.</string>
+    <string name="new_file">새 파일이 있습니다.</string>
+    <string name="no_file">서버에 파일이 없습니다.</string>
+
+    <string name="datetime_within_min">1분 이내</string>
+    <string name="datetime_in_seconds">%d 초 전</string>
+    <string name="datetime_in_minutes">%d 분 전</string>
+    <string name="datetime_in_hours">%d 시간 전</string>
+
+    <string name="login">로그인</string>
+    <string name="login_desc">IB OTA 시스템에 로그인 중....</string>
+    <string name="login_ok">로그인 성공</string>
+    <string name="login_fail">로그인 실패</string>
+
+    <string name="request_permission">IB OTA 접근 권한을 요청하시겠습니까?</string>
+    <string name="phonenumber_unavailable">전화번호 정보를 확인할 수 없어서 자동 처리를 할 수 없습니다.</string>
+    <string name="notice_quick_contact">빠른 처리를 원하시면 android@yourcompany.email 으로 연락주시기 바랍니다.</string>
+    <string name="request_done">접근 권한을 요청하였습니다."</string>
+
+    <string name="guest_id">guest</string>
+
+    <string name="no_changelog">변경 내역 기록이 없습니다.</string>
+</resources>
