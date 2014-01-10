@@ -6,10 +6,17 @@
         android:orderInCategory="100"
         android:showAsAction="ifRoom" />
 
+    <item android:id="@+id/action_admin"
+        android:icon="@drawable/ic_social_person"
+        android:title="@string/action_admin"
+        android:orderInCategory="100"
+        android:showAsAction="never"
+        android:visible="false"/>
+
     <item android:id="@+id/action_self_update"
-          android:icon="@drawable/ic_action_selfupdate"
-          android:title="@string/action_self_update"
-          android:orderInCategory="100"
-          android:showAsAction="ifRoom" />
+        android:icon="@drawable/ic_content_import_export"
+        android:title="@string/action_self_update"
+        android:orderInCategory="100"
+        android:showAsAction="withText|never" />
 
 </menu>

@@ -18,8 +18,8 @@ buildNumber = int(sys.argv[2])
 connection = httplib.HTTPSConnection('api.parse.com', 443)
 connection.connect()
 connection.request('POST', '/1/files/' + fname, open(fpath, 'r'), {
-       "X-Parse-Application-Id": "Your Application Key HERE from Parse.com",
-       "X-Parse-REST-API-Key": "Your REST API KEY HERE from Parse.com",
+       "X-Parse-Application-Id": "MYa2zLNvPZ19lVgeYvNpEexJOtTmAd6QlPmSSP7o",
+       "X-Parse-REST-API-Key": "be3ZVKAOWZHq9I1TVbXhb5BtxrZ2lhjAUWcqLFXq",
        "Content-Type": "application/binary"
      })
 
@@ -32,37 +32,46 @@ filesizestr = "%.2fMB" % (filesize / 1024.0 / 1024.0)
 modified = datetime.utcfromtimestamp(os.path.getmtime(fpath)).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
 timestamp = datetime.utcfromtimestamp(os.path.getctime(fpath)).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
 
-fchangelog = open('/var/lib/jenkins/jobs/MessageTong/workspace/changelog.xml', 'r')
+fchangelog = open('/var/lib/jenkins/jobs/MessageTong-gitlab-master/workspace/changelog.xml', 'r')
 changelog = fchangelog.read()
 
 connection.request('POST', '/1/classes/FileList', json.dumps({
-       "ACL": {
-         "*": {
-           "read": True
-         }
-       },
-       "filename":fname,
-       "file":{
-         "name":result["name"],
-         "__type":"File"
-       },
-	"size":filesizestr,
-	"bytes":filesize,
-	"modified":{
-         "__type":"Date",
-         "iso":modified
-        },
-	"timestamp":{
-	 "__type":"Date",
- 	 "iso":timestamp
-	},
-	"changeLog":changelog,
-        "buildNumber":buildNumber
-     }), {
-       "X-Parse-Application-Id": "Your Application Key HERE from Parse.com",
-       "X-Parse-REST-API-Key": "Your REST API KEY HERE from Parse.com",
-       "Content-Type": "application/json"
-     })
+  "ACL": {
+    "*": {
+      "read": True
+    },
+    "EjpL3wkWDv": {
+      "read": True,
+      "write": True
+    }
+  },
+  "filename": fname,
+  "file": {
+    "name": result[
+      "name"
+    ],
+    "__type": "File"
+  },
+  "size": filesizestr,
+  "bytes": filesize,
+  "modified": {
+    "__type": "Date",
+    "iso": modified
+  },
+  "timestamp": {
+    "__type": "Date",
+    "iso": timestamp
+  },
+  "changeLog": changelog,
+  "buildNumber": buildNumber,
+  "category": "messagetong",
+  "package_name": "net.ib.notification"
+}),
+{
+  "X-Parse-Application-Id": "MYa2zLNvPZ19lVgeYvNpEexJOtTmAd6QlPmSSP7o",
+  "X-Parse-REST-API-Key": "be3ZVKAOWZHq9I1TVbXhb5BtxrZ2lhjAUWcqLFXq",
+  "Content-Type": "application/json"
+})
 result = json.loads(connection.getresponse().read())
 print result
 

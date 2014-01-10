@@ -4,29 +4,49 @@
   <description></description>
   <keepDependencies>false</keepDependencies>
   <properties/>
-  <scm class="hudson.scm.SubversionSCM" plugin="subversion@1.50">
-    <locations>
-      <hudson.scm.SubversionSCM_-ModuleLocation>
-        <remote>svn+ssh://0.0.0.0/home/mntalk/android/NGM/truck</remote>
-        <local>./NGM/truck/</local>
-        <depthOption>infinity</depthOption>
-        <ignoreExternalsOption>false</ignoreExternalsOption>
-      </hudson.scm.SubversionSCM_-ModuleLocation>
-    </locations>
+  <scm class="hudson.plugins.git.GitSCM" plugin="git@1.5.0">
+    <configVersion>2</configVersion>
+    <userRemoteConfigs>
+      <hudson.plugins.git.UserRemoteConfig>
+        <name></name>
+        <refspec></refspec>
+        <url>git@git.infobank.net:messagebox/android-messagetong.git</url>
+      </hudson.plugins.git.UserRemoteConfig>
+    </userRemoteConfigs>
+    <branches>
+      <hudson.plugins.git.BranchSpec>
+        <name>**</name>
+      </hudson.plugins.git.BranchSpec>
+    </branches>
+    <disableSubmodules>false</disableSubmodules>
+    <recursiveSubmodules>false</recursiveSubmodules>
+    <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
+    <authorOrCommitter>false</authorOrCommitter>
+    <clean>false</clean>
+    <wipeOutWorkspace>false</wipeOutWorkspace>
+    <pruneBranches>false</pruneBranches>
+    <remotePoll>false</remotePoll>
+    <ignoreNotifyCommit>false</ignoreNotifyCommit>
+    <useShallowClone>false</useShallowClone>
+    <buildChooser class="hudson.plugins.git.util.DefaultBuildChooser"/>
+    <gitTool>Default</gitTool>
+    <submoduleCfg class="list"/>
+    <relativeTargetDir></relativeTargetDir>
+    <reference></reference>
     <excludedRegions></excludedRegions>
-    <includedRegions></includedRegions>
     <excludedUsers></excludedUsers>
-    <excludedRevprop></excludedRevprop>
-    <excludedCommitMessages></excludedCommitMessages>
-    <workspaceUpdater class="hudson.scm.subversion.CheckoutUpdater"/>
-    <ignoreDirPropChanges>false</ignoreDirPropChanges>
-    <filterChangelog>false</filterChangelog>
+    <gitConfigName></gitConfigName>
+    <gitConfigEmail></gitConfigEmail>
+    <skipTag>false</skipTag>
+    <includedRegions></includedRegions>
+    <scmName></scmName>
   </scm>
   <canRoam>true</canRoam>
   <disabled>false</disabled>
   <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
   <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
-  <triggers class="vector">
+  <jdk>(Inherit From Job)</jdk>
+  <triggers>
     <hudson.triggers.SCMTrigger>
       <spec>H 6 * * 1-5</spec>
       <ignorePostCommitHooks>false</ignorePostCommitHooks>
@@ -36,52 +56,78 @@
   <builders>
     <hudson.tasks.Shell>
       <command>#make a local.properties file
-echo &quot;sdk.dir=/usr/lib/android-sdk-linux&quot; &gt; NGM/truck/MMSSend_Lib/local.properties
-echo &quot;sdk.dir=/usr/lib/android-sdk-linux&quot; &gt; NGM/truck/NGMAccountModule/local.properties
-echo &quot;sdk.dir=/usr/lib/android-sdk-linux&quot; &gt; NGM/truck/NGMNetworkModule/local.properties
-echo &quot;sdk.dir=/usr/lib/android-sdk-linux&quot; &gt; NGM/truck/NGMNotification/local.properties
-echo &quot;sdk.dir=/usr/lib/android-sdk-linux&quot; &gt; NGM/truck/NGMPushModule/local.properties
-echo &quot;sdk.dir=/usr/lib/android-sdk-linux&quot; &gt; NGM/truck/NGMReportModule/local.properties
-echo &quot;sdk.dir=/usr/lib/android-sdk-linux&quot; &gt; NGM/truck/NGMServiceModule/local.properties
+echo &quot;sdk.dir=/usr/lib/android-sdk-linux&quot; &gt; local.properties
 
 #make a ant.properties file
 echo &quot;
 sdk.dir=/usr/lib/android-sdk-linux/tools/ant
 key.store=/home/sms/project/android/NGM/truck/NGMNotification/mntalk.keystore
 key.alias=mntalk
-key.store.password=xxxxxxxx
-key.alias.password=xxxxxxxx
-&quot; &gt; NGM/truck/NGMNotification/ant.properties
+key.store.password=info2189
+key.alias.password=info2189
+&quot; &gt; ant.properties
 
-cd NGM/truck/NGMNotification
-rm -f ./proguard-project.txt
-cp ${WORKSPACE}/proguard-project.txt .
+#rm -f ./proguard-project.txt
+#cp /var/lib/jenkins/jobs/MessageTong-dev/proguard-project.txt .
 
 export ANT_HOME=/usr/lib/android-sdk-linux/tools
 ant clean release</command>
     </hudson.tasks.Shell>
     <hudson.tasks.Shell>
-      <command>cp ${WORKSPACE}/NGM/truck/NGMNotification/bin/net.ib.notification-release.apk ${WORKSPACE}/G_MessageTong_auto-build_${BUILD_ID}.apk
-cp /var/lib/jenkins/jobs/MessageTong/builds/${BUILD_NUMBER}/changelog.xml ${WORKSPACE}/changelog.xml
+      <command>rm -f ${WORKSPACE}/G_MessageTong_auto-build_*.apk
 
-python ${WORKSPACE}/uploadToParse.py ${WORKSPACE}/G_MessageTong_auto-build_${BUILD_ID}.apk ${BUILD_NUMBER}
+cp ${WORKSPACE}/bin/net.ib.notification-release.apk ${WORKSPACE}/G_MessageTong_auto-build_${BUILD_ID}.apk
+cp /var/lib/jenkins/jobs/MessageTong-gitlab-master/builds/${BUILD_NUMBER}/changelog.xml ${WORKSPACE}/changelog.xml
 
-rm -f ${WORKSPACE}/G_MessageTong_auto-build_${BUILD_ID}.apk</command>
+python /var/lib/jenkins/jobs/MessageTong-gitlab-master/uploadToParse.py ${WORKSPACE}/G_MessageTong_auto-build_${BUILD_ID}.apk ${BUILD_NUMBER}
+
+cp -f ${WORKSPACE}/bin/proguard/*.txt ${WORKSPACE}/proguard/
+
+/var/lib/jenkins/jobs/gitcommit.sh ${BUILD_NUMBER}_G_MessageTong_auto-build_${BUILD_ID}
+</command>
     </hudson.tasks.Shell>
+    <hudson.tasks.Shell>
+      <command>cd ${WORKSPACE}/test
+ant report.junit
+</command>
+    </hudson.tasks.Shell>
+    <hudson.plugins.sonar.SonarRunnerBuilder plugin="sonar@2.1">
+      <project>/var/lib/jenkins/jobs/MessageTong-gitlab-master/sonar-project.properties</project>
+      <properties>sonar.projectVersion=${BUILD_NUMBER}
+sonar.dynamicAnalysis=reuseReports
+sonar.surefire.reportsPath=/var/lib/jenkins/jobs/MessageTong-gitlab-master/workspace/test/report/temp</properties>
+      <javaOpts></javaOpts>
+      <jdk>(Inherit From Job)</jdk>
+      <task></task>
+    </hudson.plugins.sonar.SonarRunnerBuilder>
+    <hudson.plugins.sonar.SonarRunnerBuilder plugin="sonar@2.1">
+      <project>/var/lib/jenkins/jobs/MessageTong-gitlab-master/sonar-project-android.properties</project>
+      <properties>sonar.projectVersion=${BUILD_NUMBER}
+sonar.dynamicAnalysis=reuseReports
+sonar.surefire.reportsPath=/var/lib/jenkins/jobs/MessageTong-gitlab-master/workspace/test/report/temp</properties>
+      <javaOpts></javaOpts>
+      <jdk>(Inherit From Job)</jdk>
+      <task></task>
+    </hudson.plugins.sonar.SonarRunnerBuilder>
   </builders>
   <publishers>
     <hudson.tasks.ArtifactArchiver>
-      <artifacts>NGM/truck/NGMNotification/bin/net.ib.notification-release.apk</artifacts>
+      <artifacts>G_MessageTong_auto-build_${BUILD_ID}.apk</artifacts>
       <latestOnly>false</latestOnly>
       <allowEmptyArchive>false</allowEmptyArchive>
     </hudson.tasks.ArtifactArchiver>
+    <hudson.tasks.junit.JUnitResultArchiver>
+      <testResults>test/report/temp/*.xml</testResults>
+      <keepLongStdio>false</keepLongStdio>
+      <testDataPublishers/>
+    </hudson.tasks.junit.JUnitResultArchiver>
     <hudson.tasks.Mailer plugin="mailer@1.5">
-      <recipients>android@yourcompany.email</recipients>
+      <recipients>SMS_Team@infobank.net</recipients>
       <dontNotifyEveryUnstableBuild>false</dontNotifyEveryUnstableBuild>
       <sendToIndividuals>false</sendToIndividuals>
     </hudson.tasks.Mailer>
     <com.myyearbook.hudson.plugins.confluence.ConfluencePublisher plugin="confluence-publisher@1.8">
-      <siteName>siteName.atlassian.net</siteName>
+      <siteName>wiki.infobank.net</siteName>
       <attachArchivedArtifacts>false</attachArchivedArtifacts>
       <buildIfUnstable>false</buildIfUnstable>
       <fileSet>changelog.xml</fileSet>

@@ -1,18 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:id="@+id/action_install"
-           android:title="@string/action_install"
+    <item android:id="@+id/action_mark_state"
+           android:title="@string/action_mark_state"
            android:orderInCategory="100"
            android:showAsAction="ifRoom" />
-
-    <item android:id="@+id/action_upload"
-          android:title="@string/action_upload"
-          android:orderInCategory="100"
-          android:showAsAction="ifRoom" />
-
-    <item android:id="@+id/action_delete_cache_file"
-          android:title="@string/action_delete_cache_file"
-          android:orderInCategory="100"
-          android:showAsAction="ifRoom" />
-
+    <item android:id="@+id/action_send_feedback"
+        android:title="@string/action_send_feedback"
+        android:orderInCategory="100"
+        android:showAsAction="ifRoom" />
 </menu>

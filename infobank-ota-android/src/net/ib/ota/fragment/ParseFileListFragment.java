@@ -1,19 +1,3 @@
-/*
- * Copyright (C) 2013 Infobank corporation
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package net.ib.ota.fragment;
 
 import android.annotation.SuppressLint;
@@ -25,7 +9,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.net.Uri;
-import android.os.Bundle;
+import android.os.Build;
 import android.support.v4.app.ListFragment;
 import android.text.TextUtils;
 import android.util.TypedValue;
@@ -35,7 +19,6 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -70,43 +53,11 @@ import java.util.List;
  * Created by ohjongin on 13. 7. 8.
  */
 public class ParseFileListFragment extends ListFragment implements Const {
+    protected static final boolean DEBUG_LOG = false;
     protected ParseFileListAdapter mListAdapter;
-    protected ArrayList<ParseObject> mFileList = new ArrayList<ParseObject>();
     protected static boolean mUpdateChecked = false;
     protected boolean mCanceled = false;
-
-    public static ParseFileListFragment newInstance(CharSequence label) {
-        ParseFileListFragment f = new ParseFileListFragment();
-        Bundle b = new Bundle();
-        b.putCharSequence("label", label);
-        f.setArguments(b);
-        return f;
-    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState)  {
-        super.onCreate(savedInstanceState);
-        setRetainInstance(true);
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_apk_list, null, false);
-
-        return view;
-    }
-
-    @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        mListAdapter = new ParseFileListAdapter(getActivity(), getListView(), mFileList);
-        setListAdapter(mListAdapter);
-
-        onRefresh();
-
-        setHasOptionsMenu(true);
-        //registerForContextMenu(this.getListView());
-    }
+    protected boolean mIsAdmin = false;
 
     @SuppressLint("NewApi")
     @Override
@@ -194,7 +145,13 @@ public class ParseFileListFragment extends ListFragment implements Const {
             ll.addView(tv);
         }
 
+        if (!TextUtils.isEmpty(po.getString("notice_msg"))) {
+            CustomToast.makeText(getActivity(), po.getString("notice_msg"), R.drawable.ic_launcher, Toast.LENGTH_LONG).show();
+        }
+
+        int stable_icon_id = getActivity().getResources().getIdentifier("ic_stable_" + po.getString("stable_level"), "drawable", getActivity().getPackageName());
         AlertDialog dlg = ab.setTitle(R.string.ask_install)
+                .setIcon(stable_icon_id > 0 ? stable_icon_id : R.drawable.ic_launcher)
                 .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dlg, int i) {
@@ -220,23 +177,33 @@ public class ParseFileListFragment extends ListFragment implements Const {
 
         MenuInflater inflater = this.getActivity().getMenuInflater();
         inflater.inflate(R.menu.fragment_apk_list, menu);
+
+        menu.findItem(R.id.action_mark_state).setVisible(mIsAdmin);
     }
 
     @Override
     public boolean onContextItemSelected(MenuItem item) {
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
         switch (item.getItemId()) {
-            case R.id.action_install:
-                //onActionInstall(info.position);
+            case R.id.action_mark_state:
+                onActionMarkState(info.position);
                 return true;
 
-            case R.id.action_upload:
-               //onActionUpload(info.position);
+            case R.id.action_send_feedback:
                 return true;
 
             default:
                 return super.onContextItemSelected(item);
         }
+    }
+
+    @Override
+    public void onPrepareOptionsMenu(Menu menu) {
+       /* MenuItem item = menu.findItem(R.id.action_admin);
+        if (item != null && ParseUser.getCurrentUser() != null) {
+            boolean is_admin = ParseUser.getCurrentUser().isAuthenticated() && ParseUser.getCurrentUser().getBoolean(PARSEUSR_IS_ADMIN);
+            item.setVisible(is_admin);
+        }*/
     }
 
     @Override
@@ -249,8 +216,10 @@ public class ParseFileListFragment extends ListFragment implements Const {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case R.id.action_admin:
+                break;
             case R.id.action_refresh:
-                mFileList.clear();
+                mListAdapter.clear();
                 mListAdapter.notifyDataSetChanged();
                 onRefresh();
                 break;
@@ -259,6 +228,46 @@ public class ParseFileListFragment extends ListFragment implements Const {
                 break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @SuppressLint("NewApi")
+    protected void onActionMarkState(int position) {
+        final ParseObject po = (ParseObject) mListAdapter.getItem(position);
+        final String[] choiceList = new String[] { "Stable", "Unstable", "Don't Use", "Unknown"};
+        final String[] stable_level = new String[] { "safe", "warning", "danger", ""};
+
+        AlertDialog.Builder ab = (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB) ?
+                new AlertDialog.Builder(getActivity()) :
+                new AlertDialog.Builder(getActivity(), AlertDialog.THEME_HOLO_DARK);
+
+        int selected = 3;
+        if ("safe".equalsIgnoreCase(po.getString("stable_level"))) {
+            selected = 0;
+        } else if ("warning".equalsIgnoreCase(po.getString("stable_level"))) {
+            selected = 1;
+        } else if ("danger".equalsIgnoreCase(po.getString("stable_level"))) {
+            selected = 2;
+        }
+
+        AlertDialog dlg = ab.setTitle(R.string.action_mark_state)
+                .setSingleChoiceItems(choiceList, selected, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                    }
+                })
+                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        int index = ((AlertDialog)dialog).getListView().getCheckedItemPosition();
+                        Log.e("", "Selected: " + index + ", " + whichButton);
+                        po.put("stable_level", stable_level[index]);
+                        po.saveInBackground();
+                        mListAdapter.notifyDataSetChanged();
+                    }
+                })
+                .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                    }
+                }).create();
+        dlg.show();
     }
 
     protected void onInstall(int position) {
@@ -330,17 +339,23 @@ public class ParseFileListFragment extends ListFragment implements Const {
 
     protected void onRefresh() {
         ParseQuery<ParseObject> query = ParseQuery.getQuery("FileList");
-        query.whereExists("file");
+        query.whereEqualTo("category", getArguments().getString("category"));
         query.orderByDescending("timestamp");
         query.addDescendingOrder("createdAt");
+        query.setLimit(100);
         query.findInBackground(new FindCallback<ParseObject>() {
             public void done(final List<ParseObject> objList, ParseException e) {
                 if (e == null) {
-                    Log.d("Retrieved " + objList.size() + " files");
-
-                    mFileList.clear();
-                    mFileList.addAll(objList);
-                    if (mFileList.size() < 1) {
+                    if (DEBUG_LOG) Log.d("Retrieved " + objList.size() + " files");
+                    mListAdapter.clear();
+                    if (Build.VERSION.SDK_INT < 11) {
+                        for(ParseObject po : objList) {
+                            mListAdapter.add(po);
+                        }
+                    } else {
+                        mListAdapter.addAll(objList);
+                    }
+                    if (mListAdapter.getCount() < 1) {
                         getView().findViewById(android.R.id.empty).setVisibility(View.INVISIBLE);
                         showToast(getString(R.string.no_file), CustomToast.TYPE_WARNING);
                     }
