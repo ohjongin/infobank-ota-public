@@ -26,6 +26,11 @@ OTA(Over The Air)를 간단하게 구축하고 싶으시다면 저희 사례를 
 >      versionCode - Number type
 >      versionName - String type
 
+**주의**
+
+1. AccessRequest class가 생성이 안 될 경우 General Settings에서 App permissiondl "ON" 인지 확인하십시오.
+![parce.com General settgins](screenshot_general_settings.png)
+
 **문의**
 
 ohjongin@gmail.com
